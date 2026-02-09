@@ -1,0 +1,65 @@
+{
+  "meta": {
+  "show_comments": false
+  },
+  "system": {
+    "hostname": "routerA",
+    "domain_name": "configmaster.co.uk"
+  },
+  "services": {
+    "ntp_servers": ["8.8.8.8"],
+    "dns_servers": ["8.8.8.8"]
+  },
+   "routing": {
+    "static_routes": [
+      {
+        "prefix": "0.0.0.0",
+        "mask": "0.0.0.0",
+        "next_hop": "192.0.2.1"
+      }
+    ]
+  },
+  "access": {
+    "vty": {
+      "ranges": [
+        {
+          "lines": "0 4",
+          "privilege_level": null,
+          "password": "<removed>"
+        },
+        {
+          "lines": "5 15",
+          "privilege_level": 15,
+          "password": "<removed>"
+        }
+      ],
+      "authentication": "vty",
+      "transport_input": "ssh",
+      "transport_output": "all"
+    }
+  },
+  "hardening": {
+    "exec_timeout_minutes": 5,
+    "session_timeout_minutes": 5,
+	"ssh_version": 2
+  },
+"vpn": {
+  "site_to_site": [
+    {
+      "name": "HQ-BRANCH1",
+      "local_peer": "203.0.113.1",
+      "remote_peer": "198.51.100.1",
+      "pre_shared_key": "<removed>",
+      "ike_version": 2,
+      "encryption": "aes 256",
+      "integrity": "sha256",
+      "dh_group": 14,
+      "lifetime": 86400,
+      "local_subnet": "10.0.0.0 255.255.255.0",
+      "remote_subnet": "10.1.0.0 255.255.255.0",
+      "outside_interface": "GigabitEthernet0/0"
+    }
+  ]
+}
+  
+}

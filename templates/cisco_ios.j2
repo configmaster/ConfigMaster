@@ -1,0 +1,109 @@
+{% if meta is defined and meta.show_comments %}
+! =========================
+! System
+! =========================
+{% endif %}
+hostname {{ system.hostname }}
+
+{% if system.domain_name %}
+ip domain-name {{ system.domain_name }}
+{% endif %}
+
+{% if meta is defined and meta.show_comments %}
+! =========================
+! Services
+! =========================
+{% endif %}
+{% for ntp in services.ntp_servers %}
+ntp server {{ ntp }}
+{% endfor %}
+
+{% for dns in services.dns_servers %}
+ip name-server {{ dns }}
+{% endfor %}
+
+{% if meta is defined and meta.show_comments %}
+! =========================
+! Hardening
+! =========================
+{% endif %}
+{% if hardening.ssh_version %}
+ip ssh version {{ hardening.ssh_version }}
+{% endif %}
+
+{% if meta is defined and meta.show_comments %}
+! =========================
+! VTY Access (SSH only)
+! =========================
+{% endif %}
+{% for vty in access.vty.ranges %}
+line vty {{ vty.lines }}
+ session-timeout {{ hardening.session_timeout_minutes }}
+ exec-timeout {{ hardening.exec_timeout_minutes }} 0
+{% if vty.privilege_level %}
+ privilege level {{ vty.privilege_level }}
+{% endif %}
+ password 7 {{ vty.password }}
+ logging synchronous
+ login authentication {{ access.vty.authentication }}
+ transport input {{ access.vty.transport_input }}
+ transport output {{ access.vty.transport_output }}
+!
+{% if routing.static_routes %}
+{% if meta.show_comments %}
+! =========================
+! Static Routing
+! =========================
+{% endif %}
+{% for route in routing.static_routes %}
+ip route {{ route.prefix }} {{ route.mask }} {{ route.next_hop }}
+{% endfor %}
+!
+{% if vpn.site_to_site %}
+{% for tunnel in vpn.site_to_site %}
+
+{% if meta.show_comments %}
+! =========================
+! Site-to-Site VPN: {{ tunnel.name }}
+! =========================
+{% endif %}
+
+crypto ikev2 proposal {{ tunnel.name }}-IKE-PROP
+ encryption {{ tunnel.encryption }}
+ integrity {{ tunnel.integrity }}
+ group {{ tunnel.dh_group }}
+
+crypto ikev2 policy {{ tunnel.name }}-IKE-POL
+ proposal {{ tunnel.name }}-IKE-PROP
+
+crypto ikev2 keyring {{ tunnel.name }}-KEYRING
+ peer {{ tunnel.remote_peer }}
+  address {{ tunnel.remote_peer }}
+  pre-shared-key {{ tunnel.pre_shared_key }}
+
+crypto ikev2 profile {{ tunnel.name }}-IKE-PROFILE
+ match identity remote address {{ tunnel.remote_peer }} 255.255.255.255
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local {{ tunnel.name }}-KEYRING
+
+ip access-list extended {{ tunnel.name }}-VPN-ACL
+ permit ip {{ tunnel.local_subnet }} {{ tunnel.remote_subnet }}
+
+crypto ipsec transform-set {{ tunnel.name }}-TS esp-aes 256 esp-sha256-hmac
+ mode tunnel
+
+crypto map {{ tunnel.name }} 10 ipsec-isakmp
+ set peer {{ tunnel.remote_peer }}
+ set transform-set {{ tunnel.name }}-TS
+ set ikev2-profile {{ tunnel.name }}-IKE-PROFILE
+ match address {{ tunnel.name }}-VPN-ACL
+
+interface {{ tunnel.outside_interface }}
+ crypto map {{ tunnel.name }}
+
+{% endfor %}
+{% endif %}
+!
+{% endif %}
+{% endfor %}
