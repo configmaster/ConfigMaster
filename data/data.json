@@ -11,14 +11,32 @@
     "dns_servers": ["8.8.8.8"]
   },
    "routing": {
-    "static_routes": [
+  "static_routes": [
+    {
+      "prefix": "0.0.0.0",
+      "mask": "0.0.0.0",
+      "next_hop": "192.0.2.1"
+    }
+  ],
+  "bgp": {
+    "enabled": true,
+    "local_as": 65001,
+    "router_id": "192.0.2.10",
+    "neighbors": [
       {
-        "prefix": "0.0.0.0",
-        "mask": "0.0.0.0",
-        "next_hop": "192.0.2.1"
+        "ip": "192.0.2.20",
+        "remote_as": 65002,
+        "description": "BGP-PEER-01"
+      }
+    ],
+    "networks": [
+      {
+        "prefix": "10.0.0.0",
+        "mask": "255.255.255.0"
       }
     ]
-  },
+  }
+},
   "access": {
     "vty": {
       "ranges": [

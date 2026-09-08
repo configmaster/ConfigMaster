@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Config Master</title>
+
+  <!-- Nunjucks CDN -->
+  <script src="https://unpkg.com/nunjucks@3.2.4/browser/nunjucks.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Config Master</h1>
+
+  <div class="panel">
+
+    <label for="configType">Select Configuration Type:</label>
+    <select id="configType" onchange="showForm()">
+      <option value="">-- Select --</option>
+      <option value="static">Static Route</option>
+      <option value="vpn">Site-to-Site VPN</option>
+    </select>
+
+    <!-- Static Route Form -->
+    <div id="staticForm" class="form-section">
+      <h3>Static Route</h3>
+      <input type="text" id="prefix" placeholder="Prefix (e.g. 0.0.0.0)">
+      <input type="text" id="mask" placeholder="Mask (e.g. 0.0.0.0)">
+      <input type="text" id="nextHop" placeholder="Next Hop">
+    </div>
+
+    <!-- VPN Form -->
+    <div id="vpnForm" class="form-section">
+      <h3>Site-to-Site VPN</h3>
+      <input type="text" id="peer" placeholder="Remote Peer IP">
+      <input type="text" id="psk" placeholder="Pre-Shared Key">
+    </div>
+
+    <button onclick="generateConfig()">Generate Config</button>
+
+    <pre id="output"></pre>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

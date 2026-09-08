@@ -107,3 +107,21 @@ interface {{ tunnel.outside_interface }}
 !
 {% endif %}
 {% endfor %}
+
+{% if routing.bgp.enabled %}
+router bgp {{ routing.bgp.local_as }}
+ bgp router-id {{ routing.bgp.router_id }}
+
+{% for neighbor in routing.bgp.neighbors %}
+ neighbor {{ neighbor.ip }} remote-as {{ neighbor.remote_as }}
+{% if neighbor.description %}
+ neighbor {{ neighbor.ip }} description {{ neighbor.description }}
+{% endif %}
+{% endfor %}
+
+ address-family ipv4
+{% for network in routing.bgp.networks %}
+  network {{ network.prefix }} mask {{ network.mask }}
+{% endfor %}
+ exit-address-family
+{% endif %}
